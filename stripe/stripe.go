@@ -32,8 +32,6 @@ type StripeMgr struct {
 
 
 func NewStripeMgr(appEngineContext context.Context, db *sql.DB) (*StripeMgr, error) {
-	//STRIPE_TEST_PK: 'pk_test_3XlyV4JacrilGkeqdFpHoIS2'
-	//STRIPE_TEST_SK: 'sk_test_qL7kf0RlfRgLFJxOfLL1ggZu'
 	if os.Getenv("STRIPE_TEST_SK") == "" || os.Getenv("STRIPE_TEST_PK") == "" {
 		log.Errorf(appEngineContext,"STRIPE_TEST_SK and STRIPE_TEST_PK env vars must be set!")
 		return nil, fmt.Errorf("STRIPE_TEST_SK and STRIPE_TEST_PK env vars must be set!")

@@ -80,6 +80,7 @@ func HandleRemoveCard(w http.ResponseWriter, r *http.Request) {
 		errS := "Error creating stripemgr: %s"
 		log.Errorf(c,errS, err)
 		fmt.Fprintf(w,errS, err)
+
 	}
 
 	prof := session.Profile(r)
