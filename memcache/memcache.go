@@ -10,7 +10,6 @@ import (
 
 // Add will convert attempt to convert a Go struct to JSON and store it in Memcache
 func Add(c context.Context, key string, exp time.Duration, value interface{})  error {
-
 	//serialize the value to json
 	data, err := json.Marshal(value)
 	if err != nil {
