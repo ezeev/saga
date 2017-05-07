@@ -22,6 +22,7 @@ Saga is written in Go and currently only supports Google App Engine.
 
 ## Configuration
 
+Add the following to your `app.yaml`:
 
 ```
 env_variables:
@@ -50,4 +51,11 @@ env_variables:
   AUTH0_CALLBACK_HOST_LIVE: 'https:/yourlivedomain.com'
 
   API_RATE_LIMIT_PER_MIN: '10'
+```
+
+To use the Auth0 and Stripe endpoints, simply register the handlers in your app's `init()` function:
+
+```
+	auth0.RegisterHandlers()
+	stripe.RegisterHanlders()
 ```
