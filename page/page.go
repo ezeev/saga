@@ -51,6 +51,12 @@ type Page struct {
 	StripePubKey string
 	Auth0CallBackUrl string
 	Path string
+	Auth0ClientId string
+	Auth0Domain string
+	Auth0CallBackHost string
+	Auth0CallBackURI string
+	AppDomain string
+	AppName string
 }
 
 // NewPage creates a new Page struct and returns a pointer to it.
@@ -71,8 +77,17 @@ func NewPage(w http.ResponseWriter, r *http.Request, db *sql.DB, jwt string) (*P
 		}
 	}
 	page.UserProfile = prof
+	page.AppName = os.Getenv("APP_NAME")
+	page.Auth0ClientId = os.Getenv("AUTH0_CLIENT_ID")
+	page.Auth0CallBackURI = os.Getenv("AUTH0_CALLBACK_URI")
+	if appengine.IsDevAppServer() {
+		page.Auth0CallBackHost = os.Getenv("AUTH0_CALLBACK_HOST_DEV")
+	} else {
+		page.Auth0CallBackHost = os.Getenv("AUTH0_CALLBACK_HOST_LIVE")
+	}
 
-	log.Infof(c,"Profile: %s",prof)
+
+	log.Infof(c,"Auth Client ID",page.Auth0ClientId)
 	// make sure they have a stripe Id if logged in
 
 	if page.UserProfile != nil {
@@ -124,7 +139,9 @@ func NewPage(w http.ResponseWriter, r *http.Request, db *sql.DB, jwt string) (*P
 	} else {
 		callBackUrl = os.Getenv("AUTH0_CALLBACK_HOST_LIVE") + os.Getenv("AUTH0_CALLBACK_URI")
 	}
-	page.Auth0CallBackUrl = callBackUrl
 
+	page.Auth0Domain = os.Getenv("AUTH0_DOMAIN")
+
+	page.Auth0CallBackUrl = callBackUrl
 	return page, nil
 }

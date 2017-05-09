@@ -7,7 +7,7 @@ package stripe
 import (
 	"github.com/stripe/stripe-go/client"
 	"github.com/stripe/stripe-go"
-	"google.golang.org/appengine/urlfetch"
+	//"google.golang.org/appengine/urlfetch"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/log"
 	"os"
@@ -16,6 +16,7 @@ import (
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
 	"fmt"
+	"crypto/tls"
 )
 
 
@@ -57,7 +58,15 @@ func NewStripeMgr(appEngineContext context.Context, db *sql.DB) (*StripeMgr, err
 		AppEngineContext: appEngineContext,
 	}
 	mgr.AppFilter = os.Getenv("STRIPE_APP_FILTER")
-	mgr.httpClient = urlfetch.Client(mgr.AppEngineContext)
+
+	//Stripe now requires TLS 1.2
+	//mgr.httpClient = urlfetch.Client(mgr.AppEngineContext)
+	tr := &http.Transport{
+		TLSClientConfig:    &tls.Config{},
+		DisableCompression: true,
+	}
+
+	mgr.httpClient = &http.Client{Transport: tr}
 	mgr.stripeClient = client.New(mgr.SecApiKey,stripe.NewBackends(mgr.httpClient))
 	mgr.db = db
 	return mgr, nil
