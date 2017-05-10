@@ -47,7 +47,7 @@ func HandlePage(w http.ResponseWriter, r *http.Request, tmpl string, title strin
 
 }
 
-func HandleAccountApi(w http.ResponseWriter, r *http.Request) {
+func HandlePageApi(w http.ResponseWriter, r *http.Request) {
 
 
 	//load the page

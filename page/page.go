@@ -84,6 +84,7 @@ func NewPage(w http.ResponseWriter, r *http.Request, db *sql.DB, jwt string) (*P
 	page.AppName = conf.AppName
 	page.Auth0ClientId = conf.Auth0ClientID
 	page.Auth0CallBackURI = conf.Auth0CallbackURI
+	page.AppDomain = conf.AppDomain
 	if appengine.IsDevAppServer() {
 		page.Auth0CallBackHost = conf.Auth0CallbackHostDev
 	} else {
