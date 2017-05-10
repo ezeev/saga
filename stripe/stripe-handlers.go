@@ -17,7 +17,7 @@ var reqVars = []string{"STRIPE_TEST_PK", "STRIPE_TEST_SK", "STRIPE_LIVE_PK", "ST
 
 
 // RegisterHandlers registers the /addcard, /delcard, /subscribe, and /unsubscribe API endpoints.
-func RegisterHanlders() {
+func init() {
 
 	err := util.CheckVars(reqVars)
 	if err != nil {

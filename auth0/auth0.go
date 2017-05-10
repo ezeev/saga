@@ -7,13 +7,14 @@ import (
 	"golang.org/x/oauth2"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"google.golang.org/appengine/urlfetch"
 	"google.golang.org/appengine"
 	"github.com/ezeev/saga/session"
 	cnprofile "github.com/ezeev/saga/profile"
 	"github.com/ezeev/saga/util"
 	"net/url"
+	"github.com/ezeev/saga/metrics"
+	"github.com/ezeev/saga/config"
 )
 
 
@@ -21,14 +22,19 @@ var reqVars = []string{"AUTH0_CALLBACK_URI","AUTH0_SIGNOUT_URI","AUTH0_CALLBACK_
 
 // RegisterHandlers Is a helper function that will register all Auth0 handlers using the options set in
 // your app.yaml
-func RegisterHandlers() {
+func init() {
 
 	err := util.CheckVars(reqVars)
 	if err != nil {
+		metrics.Registry().IncAuth0Errors()
 		panic(err)
 	}
-	http.HandleFunc(os.Getenv("AUTH0_CALLBACK_URI"),CallbackHandler)
-	http.HandleFunc(os.Getenv("AUTH0_SIGNOUT_URI"),HandleSignout)
+	sconf, err := config.Config()
+	if err != nil {
+		panic(err)
+	}
+	http.HandleFunc(sconf.Auth0CallbackURI,CallbackHandler)
+	http.HandleFunc(sconf.Auth0SignoutURI,HandleSignout)
 }
 
 // CallbackHandler handles the Auth0 callback. After completing the Auth0 handshake it
@@ -36,21 +42,27 @@ func RegisterHandlers() {
 // in the OAUTH_SUCCESS_REDIRECT environment variable.
 func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 
+
+	//someone is attempting to login
+	metrics.Registry().IncLoginAttempts()
+
 	c := appengine.NewContext(r)
 	client := urlfetch.Client(c)
+	sconf, _ := config.Config()
 
-	domain := os.Getenv("AUTH0_DOMAIN")
+	domain := sconf.Auth0Domain
+
 	var callBackUrl string
 	if appengine.IsDevAppServer() {
-		callBackUrl = os.Getenv("AUTH0_CALLBACK_HOST_DEV") + os.Getenv("AUTH0_CALLBACK_URI")
+		callBackUrl = sconf.Auth0CallbackHostDev + sconf.Auth0CallbackURI
 	} else {
-		callBackUrl = os.Getenv("AUTH0_CALLBACK_HOST_LIVE") + os.Getenv("AUTH0_CALLBACK_URI")
+		callBackUrl = sconf.Auth0CallbackHostLive + sconf.Auth0CallbackURI
 	}
 
 
 	conf := &oauth2.Config{
-		ClientID:     os.Getenv("AUTH0_CLIENT_ID"),
-		ClientSecret: os.Getenv("AUTH0_CLIENT_SECRET"),
+		ClientID:     sconf.Auth0ClientID,
+		ClientSecret: sconf.Auth0ClientSecret,
 		RedirectURL:  callBackUrl,
 		Scopes:       []string{"openid", "profile"},
 		Endpoint: oauth2.Endpoint{
@@ -96,7 +108,7 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 
 	if email == "" {
 		session.SetLastFailMsg(w,"You cannot use this account to authenticate. We require an email address. Either there is no email address associated with this account or the account is not verified or your email is not accessible to auth providers.")
-		http.Redirect(w, r, os.Getenv("OAUTH_SUCCESS_REDIRECT"), http.StatusTemporaryRedirect)
+		http.Redirect(w, r, sconf.OAuthSuccessRedirect, http.StatusTemporaryRedirect)
 	}
 	//create a new session
 	prof := cnprofile.NewProfile(email,photo,token.AccessToken)
@@ -104,7 +116,7 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 	session.Start(w,prof)
 
 	// decide where to redirect the user
-	redirect := os.Getenv("OAUTH_SUCCESS_REDIRECT")
+	redirect := sconf.OAuthSuccessRedirect
 	if session.LoginReferrerUrl(r) != "" {
 		redirect = session.LoginReferrerUrl(r)
 		redirect, _ = url.QueryUnescape(redirect)
@@ -122,7 +134,9 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 func HandleSignout(w http.ResponseWriter, r *http.Request) {
 	session.End(w)
 
-	redirect := os.Getenv("OAUTH_SIGNOUT_REDIRECT")
+	sconf, _ := config.Config()
+
+	redirect := sconf.OAuthSuccessRedirect
 	if session.LastReferrerUrl(r) != "" {
 		redirect = session.LastReferrerUrl(r)
 		redirect, _ = url.QueryUnescape(redirect)

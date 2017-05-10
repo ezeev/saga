@@ -13,6 +13,8 @@ import (
 )
 
 
+//NOT IN ACTIVE USE
+
 func RegisterHandlers() {
 
 	path := "/contact"

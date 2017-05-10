@@ -17,6 +17,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"fmt"
 	"crypto/tls"
+	"github.com/ezeev/saga/metrics"
 )
 
 
@@ -35,6 +36,7 @@ type StripeMgr struct {
 func NewStripeMgr(appEngineContext context.Context, db *sql.DB) (*StripeMgr, error) {
 	if os.Getenv("STRIPE_TEST_SK") == "" || os.Getenv("STRIPE_TEST_PK") == "" {
 		log.Errorf(appEngineContext,"STRIPE_TEST_SK and STRIPE_TEST_PK env vars must be set!")
+		metrics.Registry().IncStripeErrors()
 		return nil, fmt.Errorf("STRIPE_TEST_SK and STRIPE_TEST_PK env vars must be set!")
 	}
 	var pubKey string
@@ -49,6 +51,7 @@ func NewStripeMgr(appEngineContext context.Context, db *sql.DB) (*StripeMgr, err
 	}
 
 	if pubKey == "" || secKey == "" {
+		metrics.Registry().IncStripeErrors()
 		return nil, fmt.Errorf("Stripe Keys are net set, please set STRIPE_LIVE_PK and STRIPE_LIVE_SK or replace LIVE with TEST if in test mode.")
 	}
 
@@ -119,8 +122,6 @@ func (this *StripeMgr) IsSubscribed(email string, planId string) (bool, error) {
 		return false, err
 	}
 
-	log.Infof(this.AppEngineContext,"Here's all of the subs for %s: %s", email, cust.Subs.Values)
-
 	for _, v := range cust.Subs.Values {
 		if v.Plan.ID == planId {
 			return true, nil
@@ -131,6 +132,7 @@ func (this *StripeMgr) IsSubscribed(email string, planId string) (bool, error) {
 
 func (this *StripeMgr) logError(err error) {
 	log.Errorf(this.AppEngineContext, "Error in StripeMgr: %s", err)
+	metrics.Registry().IncStripeErrors()
 }
 
 func (this *StripeMgr) paramsFilter() map[string]string {

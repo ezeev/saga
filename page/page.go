@@ -3,18 +3,19 @@
 package page
 
 import (
-	"github.com/stripe/stripe-go"
+	"database/sql"
+	"fmt"
+	"github.com/ezeev/saga/metrics"
+	"github.com/ezeev/saga/profile"
 	"github.com/ezeev/saga/session"
+	stripeManager "github.com/ezeev/saga/stripe"
+	"github.com/stripe/stripe-go"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/log"
-	stripeManager "github.com/ezeev/saga/stripe"
-	"github.com/ezeev/saga/profile"
-	"net/http"
-	"os"
-	"fmt"
 	"html/template"
+	"net/http"
 	"time"
-	"database/sql"
+	"github.com/ezeev/saga/config"
 )
 
 // PageFuncMap provides a set of functions that can be passed to Go templates for displaying content
@@ -25,43 +26,44 @@ func PageFuncMap() template.FuncMap {
 			tm := time.Unix(ts, 0)
 			return tm.Format(time.RFC3339)
 		},
-		"displayAmount" : func(amount uint64) string {
+		"displayAmount": func(amount uint64) string {
 			str := fmt.Sprint(amount)
-			str = "$" + str[:len(str) - 2] + "." + str[len(str) - 2:]
+			str = "$" + str[:len(str)-2] + "." + str[len(str)-2:]
 			return str
 		},
-		"multiply" : func(x uint64, y uint64) uint64 {
+		"multiply": func(x uint64, y uint64) uint64 {
 			return x * y
 		},
 	}
 	return fm
 }
 
-
 // Page is a struct composed of all data needed to render pages or API responses for a user.
 type Page struct {
-	Title string
-	UserProfile *profile.Profile
-	StripeId string
-	StripeCustomer *stripe.Customer
-	Plans *[]stripe.Plan
-	Cards *[]stripe.Card
-	LastSuccessMsg string
-	LastFailMsg string
-	StripePubKey string
-	Auth0CallBackUrl string
-	Path string
-	Auth0ClientId string
-	Auth0Domain string
+	Title             string
+	UserProfile       *profile.Profile
+	StripeId          string
+	StripeCustomer    *stripe.Customer
+	Plans             *[]stripe.Plan
+	Cards             *[]stripe.Card
+	LastSuccessMsg    string
+	LastFailMsg       string
+	StripePubKey      string
+	Auth0CallBackUrl  string
+	Path              string
+	Auth0ClientId     string
+	Auth0Domain       string
 	Auth0CallBackHost string
-	Auth0CallBackURI string
-	AppDomain string
-	AppName string
+	Auth0CallBackURI  string
+	AppDomain         string
+	AppName           string
 }
 
 // NewPage creates a new Page struct and returns a pointer to it.
 // If the user is logged in, it will load the respective child structs for the user's account.
 func NewPage(w http.ResponseWriter, r *http.Request, db *sql.DB, jwt string) (*Page, error) {
+
+	conf, _ := config.Config()
 
 	c := appengine.NewContext(r)
 	page := &Page{}
@@ -73,25 +75,23 @@ func NewPage(w http.ResponseWriter, r *http.Request, db *sql.DB, jwt string) (*P
 	} else {
 		prof, _, err = profile.ToProfile(jwt)
 		if err != nil {
+			log.Errorf(c, "Error in NewPage while getting session: %s", err)
+			metrics.Registry().IncPageLoadErrors()
 			panic(err)
 		}
 	}
 	page.UserProfile = prof
-	page.AppName = os.Getenv("APP_NAME")
-	page.Auth0ClientId = os.Getenv("AUTH0_CLIENT_ID")
-	page.Auth0CallBackURI = os.Getenv("AUTH0_CALLBACK_URI")
+	page.AppName = conf.AppName
+	page.Auth0ClientId = conf.Auth0ClientID
+	page.Auth0CallBackURI = conf.Auth0CallbackURI
 	if appengine.IsDevAppServer() {
-		page.Auth0CallBackHost = os.Getenv("AUTH0_CALLBACK_HOST_DEV")
+		page.Auth0CallBackHost = conf.Auth0CallbackHostDev
 	} else {
-		page.Auth0CallBackHost = os.Getenv("AUTH0_CALLBACK_HOST_LIVE")
+		page.Auth0CallBackHost = conf.Auth0CallbackHostLive
 	}
 
-
-	log.Infof(c,"Auth Client ID",page.Auth0ClientId)
-	// make sure they have a stripe Id if logged in
-
 	if page.UserProfile != nil {
-		stripeMgr, err := stripeManager.NewStripeMgr(c,db)
+		stripeMgr, err := stripeManager.NewStripeMgr(c, db)
 		if err != nil {
 			return nil, err
 		}
@@ -115,19 +115,19 @@ func NewPage(w http.ResponseWriter, r *http.Request, db *sql.DB, jwt string) (*P
 		//store the user's subscribed plans in their jwt token
 		var planIds []string
 		for _, v := range cust.Subs.Values {
-			planIds = append(planIds,v.Plan.ID)
+			planIds = append(planIds, v.Plan.ID)
 		}
 
 	}
 
-	page.LastFailMsg = session.LastFailMsg(w,r)
-	page.LastSuccessMsg = session.LastSuccessMsg(w,r)
+	page.LastFailMsg = session.LastFailMsg(w, r)
+	page.LastSuccessMsg = session.LastSuccessMsg(w, r)
 
 	var pubKey string
 	if appengine.IsDevAppServer() {
-		pubKey = os.Getenv("STRIPE_TEST_PK")
+		pubKey = conf.StripeTestPublicKey
 	} else {
-		pubKey = os.Getenv("STRIPE_LIVE_PK")
+		pubKey = conf.StripeLivePublicKey
 	}
 
 	page.StripePubKey = pubKey
@@ -135,12 +135,12 @@ func NewPage(w http.ResponseWriter, r *http.Request, db *sql.DB, jwt string) (*P
 	var callBackUrl string
 
 	if appengine.IsDevAppServer() {
-		callBackUrl = os.Getenv("AUTH0_CALLBACK_HOST_DEV") + os.Getenv("AUTH0_CALLBACK_URI")
+		callBackUrl = conf.Auth0CallbackHostDev + conf.Auth0CallbackURI
 	} else {
-		callBackUrl = os.Getenv("AUTH0_CALLBACK_HOST_LIVE") + os.Getenv("AUTH0_CALLBACK_URI")
+		callBackUrl = conf.Auth0CallbackHostLive + conf.Auth0CallbackURI
 	}
 
-	page.Auth0Domain = os.Getenv("AUTH0_DOMAIN")
+	page.Auth0Domain = conf.Auth0Domain
 
 	page.Auth0CallBackUrl = callBackUrl
 	return page, nil

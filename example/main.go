@@ -2,17 +2,18 @@ package main
 
 import (
 	"net/http"
-	"github.com/ezeev/saga/auth0"
-	"github.com/ezeev/saga/stripe"
+	_ "github.com/ezeev/saga/auth0"
+	_ "github.com/ezeev/saga/stripe"
+	_ "github.com/ezeev/saga/metrics"
 	"github.com/ezeev/saga/page"
+	"github.com/ezeev/saga/middleware"
 )
 
 func init() {
 	http.HandleFunc("/", handler)
 
-	auth0.RegisterHandlers()
-	stripe.RegisterHanlders()
-
+	//example exposing account information over API w/ auth and rate limiting
+	http.HandleFunc("/api/account",middleware.ApiAuth(page.HandleAccountApi))
 
 }
 
