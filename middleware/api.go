@@ -13,7 +13,7 @@ import (
 
 // ApiAuth, when used on an API endpoint, provides CORS (including "OPTIONS" request support),
 // Java Web Token (jwt) validation/authorization, and IP Address based rate limiting.
-func ApiAuth(fn http.HandlerFunc) http.HandlerFunc {
+func Api(fn http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		//Set CORS Headers
 		w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -23,6 +23,12 @@ func ApiAuth(fn http.HandlerFunc) http.HandlerFunc {
 			//don't need to do anything else
 			return
 		}
+		fn.ServeHTTP(w, r)
+	}
+}
+
+func ApiAuth(fn http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
 		//look for the jwt header
 		var jwtToken string
 		jwtToken = r.Header.Get("X-Auth-Token")
@@ -49,14 +55,6 @@ func ApiRateLimit(fn http.HandlerFunc) http.HandlerFunc {
 		conf, err := config.Config()
 		if err != nil {
 			panic(err)
-		}
-		//Set CORS Headers
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type, X-Auth-Token")
-		if r.Method == "OPTIONS" {
-			//don't need to do anything else
-			return
 		}
 
 		// rate limiter

@@ -5,6 +5,7 @@ package page
 import (
 	"database/sql"
 	"fmt"
+	"github.com/ezeev/saga/config"
 	"github.com/ezeev/saga/metrics"
 	"github.com/ezeev/saga/profile"
 	"github.com/ezeev/saga/session"
@@ -15,7 +16,6 @@ import (
 	"html/template"
 	"net/http"
 	"time"
-	"github.com/ezeev/saga/config"
 )
 
 // PageFuncMap provides a set of functions that can be passed to Go templates for displaying content
@@ -57,6 +57,7 @@ type Page struct {
 	Auth0CallBackURI  string
 	AppDomain         string
 	AppName           string
+	UserToken         string
 }
 
 // NewPage creates a new Page struct and returns a pointer to it.
@@ -92,6 +93,7 @@ func NewPage(w http.ResponseWriter, r *http.Request, db *sql.DB, jwt string) (*P
 	}
 
 	if page.UserProfile != nil {
+		page.UserToken, _ = profile.ToJwt(page.UserProfile)
 		stripeMgr, err := stripeManager.NewStripeMgr(c, db)
 		if err != nil {
 			return nil, err

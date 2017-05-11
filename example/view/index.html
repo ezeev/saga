@@ -47,11 +47,9 @@ This is the home page
     {{ $length := len .Cards }} {{ if eq $length 0 }}
         <i>You do not have any payment cards on your account.</i> <br />
     {{ end }}
-
     <p>
         <a onclick="openStripe()">Add a Card</a>
     </p>
-
 {{ end }}
 
 <!-- / End Stripe Cards -->
@@ -84,6 +82,25 @@ This is the home page
 {{end}}
 
 
+<h4>API Examples</h4>
+
+<b>Call the page API, with no user token:</b>
+<p>
+curl {{ .Auth0CallBackHost}}/api/page
+</p>
+
+{{ if .UserProfile }}
+    <b>Call the page API, with your user token:</b>
+    <p>
+        curl -H "X-Auth-Token: {{ .UserToken }}" {{ .Auth0CallBackHost}}/api/page
+    </p>
+
+
+    <b>Call a secure API, with your Jwt token:</b>
+    <p>
+    curl -H "X-Auth-Token: {{ .UserToken }}" {{ .Auth0CallBackHost}}/api/example
+    </p>
+{{ end }}
 
 <!-- JS BELOW THIS LINE
 ========================================

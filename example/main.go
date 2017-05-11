@@ -18,19 +18,23 @@ func init() {
 	// so it can be queried via client Javascript. Ideal for SPAs.
 	// If no valid "X-Auth-Token" header is set the page response will only
 	// be populated with public-safe info
-	http.HandleFunc("/api/page",middleware.ApiRateLimit(page.HandlePageApi))
+	http.HandleFunc("/api/page",
+		middleware.Api(
+		middleware.ApiRateLimit(
+			page.HandlePageApi)))
 
 
-	// example chaining the ApiAuth and ApiRateLimit middleware on an API end point
+	// example chaining the Api, ApiAuth and ApiRateLimit middleware on an API end point
 	// exposing fictional secure data. A user MUST pass a valid JWT token via setting the
 	// "X-Auth-Token" header to get a valid response. To see your JWT token, login
 	// via the example page, then look for the cn-profile cookie stored in your browser
 	// example curl command (replace YOUR_JWT):
 	// curl -H "X-Auth-Token: YOUR_JWT" http://localhost:8080/api/example
 	http.HandleFunc("/api/example",
+		middleware.Api(
 		middleware.ApiAuth(
 		middleware.ApiRateLimit(
-			secureApiExampleHandler)))
+			secureApiExampleHandler))))
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
