@@ -1,0 +1,29 @@
+<!-- Cards Stored in Stripe -->
+
+    <p class="lead">Your Payment Methods</p>
+
+      {{ if .UserProfile }}
+        <table class="table">
+            <thead>
+                <tr>
+                    <td>Card</td>
+                    <td>Action</td>
+                </tr>
+            </thead>
+        {{range .Cards}}
+         <tr>
+             <td>{{.Display}} {{ if .Default }} (Default) {{ end }}</td> <td><a href="/delcard?cardId={{ .ID }}">X</a></td>
+         </tr>
+        {{end}}
+        </table>
+          {{ $length := len .Cards }} {{ if eq $length 0 }}
+      <i>You do not have any payment cards on your account.</i> <br />
+      {{ end }}
+    <p>
+      <a onclick="openStripe()" class="btn btn--sm btn--primary type--uppercase"> <span class="btn__text">
+        Add Card
+      </span> </a>
+    </p>
+    {{ end }}
+
+<!-- / End Stripe Cards -->

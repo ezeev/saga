@@ -1,14 +1,18 @@
 package metrics
 
-import "os"
+import (
+	"os"
+)
 
-var registry MetricsRegistry
+var registry MetricsRegistry = nil
 
 func init() {
 	metricsProvider := os.Getenv("METRICS_PROVIDER")
 	if metricsProvider == "" || metricsProvider == "prometheus" {
-		registry = prometheusMetrics{}
-		registry.Start()
+		if registry == nil {
+			registry = prometheusMetrics{}
+			registry.Start()
+		}
 	}
 }
 

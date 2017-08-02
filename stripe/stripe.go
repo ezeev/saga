@@ -7,17 +7,14 @@ package stripe
 import (
 	"github.com/stripe/stripe-go/client"
 	"github.com/stripe/stripe-go"
-	//"google.golang.org/appengine/urlfetch"
-	"google.golang.org/appengine"
-	"google.golang.org/appengine/log"
-	"os"
-	"golang.org/x/net/context"
 	"net/http"
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
 	"fmt"
 	"crypto/tls"
 	"github.com/ezeev/saga/metrics"
+	"log"
+	"github.com/ezeev/saga/config"
 )
 
 
@@ -25,29 +22,41 @@ type StripeMgr struct {
 	PubApiKey string
 	SecApiKey string
 	AppFilter string
-	AppEngineContext context.Context
-	httpClient *http.Client
 	stripeClient *client.API
 	db *sql.DB
+	IsDev bool
+	conf *config.SagaConfig
 }
 
 
 
-func NewStripeMgr(appEngineContext context.Context, db *sql.DB) (*StripeMgr, error) {
-	if os.Getenv("STRIPE_TEST_SK") == "" || os.Getenv("STRIPE_TEST_PK") == "" {
-		log.Errorf(appEngineContext,"STRIPE_TEST_SK and STRIPE_TEST_PK env vars must be set!")
+//func NewStripeMgr(ctx context.Context, db *sql.DB) (*StripeMgr, error) {
+func NewStripeMgr(db *sql.DB) (*StripeMgr, error) {
+
+	conf, err := config.Config()
+	if err != nil {
+		log.Printf("Error loading config %s", err)
+	}
+
+	//if os.Getenv("STRIPE_TEST_SK") == "" || os.Getenv("STRIPE_TEST_PK") == "" {
+	if conf.StripeTestSecretKey == "" || conf.StripeTestPublicKey == "" {
+		//log.Errorf(appEngineContext,"STRIPE_TEST_SK and STRIPE_TEST_PK env vars must be set!")
 		metrics.Registry().IncStripeErrors()
 		return nil, fmt.Errorf("STRIPE_TEST_SK and STRIPE_TEST_PK env vars must be set!")
 	}
 	var pubKey string
 	var secKey string
+	var isDev bool
 
-	if appengine.IsDevAppServer() {
-		pubKey = os.Getenv("STRIPE_TEST_PK")
-		secKey = os.Getenv("STRIPE_TEST_SK")
+	//if os.Getenv("DEV") == "true" {
+	if conf.IsDev == true {
+		pubKey = conf.StripeTestPublicKey //os.Getenv("STRIPE_TEST_PK")
+		secKey = conf.StripeTestSecretKey //os.Getenv("STRIPE_TEST_SK")
+		isDev = true
 	} else {
-		pubKey = os.Getenv("STRIPE_LIVE_PK")
-		secKey = os.Getenv("STRIPE_LIVE_SK")
+		pubKey = conf.StripeLivePublicKey //os.Getenv("STRIPE_LIVE_PK")
+		secKey = conf.StripeLiveSecretKey //os.Getenv("STRIPE_LIVE_SK")
+		isDev = false
 	}
 
 	if pubKey == "" || secKey == "" {
@@ -58,19 +67,19 @@ func NewStripeMgr(appEngineContext context.Context, db *sql.DB) (*StripeMgr, err
 	mgr := &StripeMgr{
 		PubApiKey: pubKey,
 		SecApiKey: secKey,
-		AppEngineContext: appEngineContext,
+		IsDev: isDev,
+		conf: conf,
 	}
-	mgr.AppFilter = os.Getenv("STRIPE_APP_FILTER")
+	mgr.AppFilter = conf.StripeAppFilter //os.Getenv("STRIPE_APP_FILTER")
 
 	//Stripe now requires TLS 1.2
-	//mgr.httpClient = urlfetch.Client(mgr.AppEngineContext)
 	tr := &http.Transport{
 		TLSClientConfig:    &tls.Config{},
 		DisableCompression: true,
 	}
 
-	mgr.httpClient = &http.Client{Transport: tr}
-	mgr.stripeClient = client.New(mgr.SecApiKey,stripe.NewBackends(mgr.httpClient))
+	httpClient := &http.Client{Transport: tr}
+	mgr.stripeClient = client.New(mgr.SecApiKey,stripe.NewBackends(httpClient))
 	mgr.db = db
 	return mgr, nil
 }
@@ -79,7 +88,7 @@ func NewStripeMgr(appEngineContext context.Context, db *sql.DB) (*StripeMgr, err
 func (this *StripeMgr) getStripeIdDB(email string) (string, error) {
 
 	var env string
-	if appengine.IsDevAppServer() {
+	if this.IsDev {
 		env = "dev"
 	} else {
 		env = "live"
@@ -97,7 +106,7 @@ func (this *StripeMgr) getStripeIdDB(email string) (string, error) {
 func (this *StripeMgr) saveStripeIdDB(email string, stripeId string) error {
 
 	var env string
-	if appengine.IsDevAppServer() {
+	if this.IsDev {
 		env = "dev"
 	} else {
 		env = "live"
@@ -131,7 +140,7 @@ func (this *StripeMgr) IsSubscribed(email string, planId string) (bool, error) {
 }
 
 func (this *StripeMgr) logError(err error) {
-	log.Errorf(this.AppEngineContext, "Error in StripeMgr: %s", err)
+	log.Printf("Error in StripeMgr: %s", err)
 	metrics.Registry().IncStripeErrors()
 }
 

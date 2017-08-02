@@ -1,0 +1,22 @@
+
+<section class="example">
+    <h3 class="mdc-typography--title">API Examples</h3>
+
+    <b>Call the page API, with no user token:</b>
+    <p>
+        curl {{ .Auth0CallBackHost}}/api/page
+    </p>
+
+    {{ if .UserProfile }}
+    <b>Call the page API, with your Jwt token:</b>
+    <p>
+        curl -H "X-Auth-Token: {{ .UserToken }}" {{ .Auth0CallBackHost}}/api/page
+    </p>
+
+
+    <b>Call a secure API, with your Jwt token:</b>
+    <p>
+        curl -H "X-Auth-Token: {{ .UserToken }}" {{ .Auth0CallBackHost}}/api/example
+    </p>
+    {{ end }}
+</section>

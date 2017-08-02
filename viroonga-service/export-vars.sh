@@ -1,0 +1,29 @@
+
+export DEV=true
+export APP_NAME=Viroonga
+export APP_DOMAIN=viroonga.appspot.com
+export TEST_DOMAIN=localhost:3001
+export METRICS_PROVIDER=prometheus
+export METRICS_URI="/metrics"
+export TEMPLATE_GLOB_PATTERN="view/*.html"
+export STRIPE_CARD_REDIRECT="/"
+export STRIPE_TEST_PK=pk_test_zsGE4KYv7dNiIcHO0h7gzntI
+export STRIPE_TEST_SK=sk_test_oy3VsLUvcSyhIOb4mHN5MUUh
+export STRIPE_LIVE_PK=pk_live_Xs3Y5RHyj8LBbMU4S6lNu6sO
+export STRIPE_LIVE_SK=sk_live_2ybkVYAdXaT3bx5Bl7wiltnK
+export STRIPE_APP_FILTER=""
+export CLOUDSQL_CONNECTION_NAME="cloud-ninjaio:us-central1:cloud-ninja"
+export CLOUDSQL_DB_NAME="viroonga"
+export CLOUDSQL_USER="root"
+export CLOUDSQL_PASSWORD=""
+export CLOUDSQL_CONN_STR="root@tcp(127.0.0.1:3306)/viroonga"
+
+export AUTH0_DOMAIN="quantiventures.auth0.com"
+export AUTH0_CLIENT_ID="StcQg3wVzcXY1eoGemgQTUxUisC7YyFt"
+export AUTH0_CLIENT_SECRET="QOGl-2o_BHUjmX35QejqzGbpeyZ6ZtVL6_YdKAtnpgbcJSviUbP0e4iEzL2UtBx2"
+export AUTH0_CALLBACK_URI="/callback"
+export AUTH0_SIGNOUT_URI="/signout"
+export AUTH0_CALLBACK_HOST_DEV="http://localhost:3001"
+export AUTH0_CALLBACK_HOST_LIVE="https://viroonga.appspot.com"
+export OAUTH_SUCCESS_REDIRECT="/"
+export API_RATE_LIMIT_PER_MIN="10"

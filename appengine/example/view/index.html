@@ -1,0 +1,150 @@
+
+<html class="mdc-typography">
+
+<head>
+    <title>Saga Example Page</title>
+    <link rel="stylesheet" href="static/node_modules/material-components-web/dist/material-components-web.css">
+    <link rel="stylesheet" href="static/css/styles.css">
+    <link rel="stylesheet" href="static/css/theme.css">
+    <link rel="stylesheet" href="static/css/grid.css">
+    <link rel="stylesheet" href="static/css/grid-list.css">
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Mono" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500">
+</head>
+
+<body>
+
+
+
+<main>
+    <div class="mdc-toolbar-fixed-adjust"></div>
+
+    {{ template "hero.html" . }}
+
+    {{ template "profile.html" . }}
+    {{ template "creditcards.html" . }}
+    {{ template "subscriptions.html" . }}
+    {{ template "apiexamples.html" . }}
+
+
+<!-- JS BELOW THIS LINE
+========================================
+-->
+
+
+<!-- AUTH0 AUTH -->
+<script src="https://cdn.auth0.com/js/lock/10.9.1/lock.min.js"></script>
+<script>
+
+    const appName = '{{ .AppName }}';
+    const appDomain = '{{ .Auth0CallBackHost }}';
+    const auth0ClientId = '{{ .Auth0ClientId }}';
+    const auth0Domain = '{{ .Auth0Domain }}';
+    const auth0CallBackURI = '{{ .Auth0CallBackURI }}';
+    const stripePubKey = '{{ .StripePubKey }}';
+    const userEmail = getCookie('cn-email');
+
+
+    function showLogin(){
+        lock.show();
+    }
+
+    function logout(){
+        window.location = appDomain + '/signout';
+    }
+
+    function webBasePath() {
+        return appDomain;
+    }
+
+    function apiBasePath() {
+        return appDomain + '/api';
+    }
+
+    // get a cookie
+    function getCookie(cname) {
+        var name = cname + "=";
+        var decodedCookie = decodeURIComponent(document.cookie);
+        var ca = decodedCookie.split(';');
+        for(var i = 0; i <ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) == ' ') {
+                c = c.substring(1);
+            }
+            if (c.indexOf(name) == 0) {
+                return c.substring(name.length, c.length);
+            }
+        }
+        return "";
+    }
+
+    var lock = new Auth0Lock(auth0ClientId, auth0Domain, {
+        auth: {
+            redirectUrl: appDomain + auth0CallBackURI,
+            responseType: 'code',
+            params: {
+                scope: 'openid email' // Learn about scopes: https://auth0.com/docs/scopes
+            }
+        },
+        theme: {
+            primaryColor: '#3f51b5',
+            name: appName,
+            foregroundColor: "#000000"
+        },
+    });
+
+
+</script>
+
+<!-- /END AUTH0 -->
+
+
+<!-- STRIPE -->
+
+<!-- Stripe Custom Form -->
+<br />
+<script src="https://checkout.stripe.com/checkout.js"></script>
+
+</div>
+
+<script>
+    var handler = StripeCheckout.configure({
+        key: stripePubKey,
+        image: 'https://stripe.com/img/documentation/checkout/marketplace.png',
+        locale: 'auto',
+        token: function(token) {
+            // You can access the token ID with `token.id`.
+            // Get the token ID to your server-side code for use.
+            window.location.href = webBasePath() + '/addcard?token_id=' + token.id;
+        }
+    });
+    // Close Checkout on page navigation:
+    window.addEventListener('popstate', function() {
+        handler.close();
+    });
+
+    function openStripe() {
+        handler.open({
+            name: 'Add a Credit Card',
+            email: userEmail,
+            description: 'Add a Credit Card to your Cloud Ninja account.',
+            panelLabel: 'Add a Card',
+            allowRememberMe: false,
+        });
+    }
+
+
+
+</script>
+
+
+<!-- /END STRIPE -->
+
+<script src="static/node_modules/material-components-web/dist/material-components-web.js"></script>
+<script>mdc.autoInit()</script>
+
+</main>
+</body>
+
+</html>

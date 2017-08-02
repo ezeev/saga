@@ -1,0 +1,18 @@
+<!-- Cards Stored in Stripe -->
+<section class="example">
+    <h3 class="mdc-typography--title">Credit/Debit Cards</h3>
+
+    {{ if .UserProfile }}
+    {{range .Cards}}
+    {{.Display}} {{ if .Default }} (Default) {{ end }} <a href="/delcard?cardId={{ .ID }}">X</a> <br />
+    {{end}}
+
+    {{ $length := len .Cards }} {{ if eq $length 0 }}
+    <i>You do not have any payment cards on your account.</i> <br />
+    {{ end }}
+    <p>
+        <button onclick="openStripe()" class="mdc-button mdc-button--raised button mdc-theme--accent-bg mdc-theme--text-primary-on-accent">Add Card</button>
+    </p>
+    {{ end }}
+</section>
+<!-- / End Stripe Cards -->

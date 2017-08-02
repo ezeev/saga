@@ -4,8 +4,6 @@ package cloudsql
 import (
 	"database/sql"
 	"os"
-	"fmt"
-	"google.golang.org/appengine"
 	"log"
 )
 
@@ -13,20 +11,14 @@ import (
 // ConnStr constructs a Google Cloud SQL Connection String.
 func ConnStr() string {
 
-	connectionName := mustGetenv("CLOUDSQL_CONNECTION_NAME")
-	user := mustGetenv("CLOUDSQL_USER")
-	password := os.Getenv("CLOUDSQL_PASSWORD") // NOTE: password may be empty
-	dbName := mustGetenv("CLOUDSQL_DB_NAME")
+	//connectionName := mustGetenv("CLOUDSQL_CONNECTION_NAME")
+	//user := mustGetenv("CLOUDSQL_USER")
+	//password := os.Getenv("CLOUDSQL_PASSWORD") // NOTE: password may be empty
+	//dbName := mustGetenv("CLOUDSQL_DB_NAME")
 
-	dev_conn_str := os.Getenv("CLOUDSQL_DEV_CONN_STR")
-
-	if !appengine.IsDevAppServer() {
-		return fmt.Sprintf("%s:%s@cloudsql(%s)/%s", user, password, connectionName, dbName)
-	} else {
-		return dev_conn_str
-	}
+	conn_str := mustGetenv("CLOUDSQL_CONN_STR")
+	return conn_str
 }
-
 // CloudSQLConnection Opens a Cloud SQL Connection and returns a pointer to it.
 func CloudSQLConnection() (*sql.DB, error) {
 

@@ -1,2 +1,5 @@
 .idea/*
 example/app.yaml
+deployment.yml
+keys/*
+acme.sh/*

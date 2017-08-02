@@ -7,8 +7,6 @@ import (
 	"golang.org/x/oauth2"
 	"io/ioutil"
 	"net/http"
-	"google.golang.org/appengine/urlfetch"
-	"google.golang.org/appengine"
 	"github.com/ezeev/saga/session"
 	cnprofile "github.com/ezeev/saga/profile"
 	"github.com/ezeev/saga/util"
@@ -45,15 +43,12 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 
 	//someone is attempting to login
 	metrics.Registry().IncLoginAttempts()
-
-	c := appengine.NewContext(r)
-	client := urlfetch.Client(c)
 	sconf, _ := config.Config()
 
 	domain := sconf.Auth0Domain
 
 	var callBackUrl string
-	if appengine.IsDevAppServer() {
+	if sconf.IsDev {
 		callBackUrl = sconf.Auth0CallbackHostDev + sconf.Auth0CallbackURI
 	} else {
 		callBackUrl = sconf.Auth0CallbackHostLive + sconf.Auth0CallbackURI
@@ -72,13 +67,13 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	code := r.URL.Query().Get("code")
-	token, err := conf.Exchange(c, code)
+	token, err := conf.Exchange(oauth2.NoContext, code)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	// Getting now the userInfo
-	client = conf.Client(c, token)
+	client := conf.Client(oauth2.NoContext, token)
 	resp, err := client.Get("https://" + domain + "/userinfo")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -136,7 +131,7 @@ func HandleSignout(w http.ResponseWriter, r *http.Request) {
 
 	sconf, _ := config.Config()
 
-	redirect := sconf.OAuthSuccessRedirect
+	redirect := sconf.Auth0SignoutRedirectURI
 	if session.LastReferrerUrl(r) != "" {
 		redirect = session.LastReferrerUrl(r)
 		redirect, _ = url.QueryUnescape(redirect)

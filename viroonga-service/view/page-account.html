@@ -1,0 +1,73 @@
+
+{{ template "header.html" . }}
+
+        <section class="imagebg space--xs" data-overlay="4">
+                      <div class="background-image-holder"> <img alt="background" src="static/img/8-bg.png"> </div>
+                      <div class="container">
+                          <div class="row">
+                              <div class="col-sm-12">
+                                  <h1>Manage Your Services</h1>
+                                  <ol class="breadcrumbs">
+                                      <li><a href="/">Home</a></li>
+                                      <li>Manage</li>
+                                  </ol>
+                                  <hr> </div>
+                          </div>
+                      </div>
+        </section>
+
+
+          <section>
+
+             <div class="container">
+                 <div class="row">
+                     <div class="col-sm-7">
+
+
+                         <!-- Status Messages -->
+                         {{ if .LastSuccessMsg }}
+                         <div class="alert alert-success">
+                             <strong>Success!</strong> {{ .LastSuccessMsg }}
+                         </div>
+                         {{ end }}
+
+                         {{ if .LastFailMsg }}
+                         <div class="alert alert-danger">
+                             <strong>Failure!</strong> {{ .LastFailMsg }}
+                         </div>
+                         {{ end }}
+
+
+                         {{ template "profile.html" . }}
+                         {{ template "subscriptions.html" . }}
+                         {{ template "creditcards.html" . }}
+
+                     </div>
+
+
+                     <div class="col-sm-5">
+                         <div class="boxed boxed--lg boxed--border bg--secondary"> <img alt="image" src="static/img/cowork-6.jpg" class="border--round">
+                             <h5>Questions?</h5>
+                             <form action="/sendmail" method="post" data-recaptcha-sitekey="6LfEsiYUAAAAAIra6oEAIJb-5oM1GsqYqGFYWZpm">
+                                 <input type="text" class="validate-required" name="name" placeholder="Your Name">
+                                 <input type="text" class="validate-required validate-email" name="from" placeholder="Email Address">
+                                 <textarea class="validate-required" name="body" rows="4" placeholder="Message"></textarea>
+                                 <div class="col-xs-12">
+                                     <div class="recaptcha"></div>
+                                 </div>
+                                 <input type="submit" value="Send Message">
+                             </form>
+                         </div>
+                     </div>
+
+
+                 </div>
+             </div>
+         </section>
+
+
+
+
+      <!--  {{ template "apiexamples.html" . }} -->
+
+{{ template "footer.html" . }}

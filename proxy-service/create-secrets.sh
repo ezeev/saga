@@ -1,0 +1,1 @@
+kubectl create secret tls viroonga-letsencrypt-secret --key acme.sh/viroonga.com.key --cert acme.sh/fullchain.cer

@@ -11,8 +11,7 @@ import (
 	"github.com/ezeev/saga/session"
 	stripeManager "github.com/ezeev/saga/stripe"
 	"github.com/stripe/stripe-go"
-	"google.golang.org/appengine"
-	"google.golang.org/appengine/log"
+	"log"
 	"html/template"
 	"net/http"
 	"time"
@@ -66,7 +65,6 @@ func NewPage(w http.ResponseWriter, r *http.Request, db *sql.DB, jwt string) (*P
 
 	conf, _ := config.Config()
 
-	c := appengine.NewContext(r)
 	page := &Page{}
 	page.Path = r.RequestURI
 	var prof *profile.Profile
@@ -76,7 +74,7 @@ func NewPage(w http.ResponseWriter, r *http.Request, db *sql.DB, jwt string) (*P
 	} else {
 		prof, _, err = profile.ToProfile(jwt)
 		if err != nil {
-			log.Errorf(c, "Error in NewPage while getting session: %s", err)
+			log.Printf("Error in NewPage while getting session: %s", err)
 			metrics.Registry().IncPageLoadErrors()
 			panic(err)
 		}
@@ -86,7 +84,7 @@ func NewPage(w http.ResponseWriter, r *http.Request, db *sql.DB, jwt string) (*P
 	page.Auth0ClientId = conf.Auth0ClientID
 	page.Auth0CallBackURI = conf.Auth0CallbackURI
 	page.AppDomain = conf.AppDomain
-	if appengine.IsDevAppServer() {
+	if conf.IsDev {
 		page.Auth0CallBackHost = conf.Auth0CallbackHostDev
 	} else {
 		page.Auth0CallBackHost = conf.Auth0CallbackHostLive
@@ -94,7 +92,7 @@ func NewPage(w http.ResponseWriter, r *http.Request, db *sql.DB, jwt string) (*P
 
 	if page.UserProfile != nil {
 		page.UserToken, _ = profile.ToJwt(page.UserProfile)
-		stripeMgr, err := stripeManager.NewStripeMgr(c, db)
+		stripeMgr, err := stripeManager.NewStripeMgr(db)
 		if err != nil {
 			return nil, err
 		}
@@ -127,7 +125,7 @@ func NewPage(w http.ResponseWriter, r *http.Request, db *sql.DB, jwt string) (*P
 	page.LastSuccessMsg = session.LastSuccessMsg(w, r)
 
 	var pubKey string
-	if appengine.IsDevAppServer() {
+	if conf.IsDev {
 		pubKey = conf.StripeTestPublicKey
 	} else {
 		pubKey = conf.StripeLivePublicKey
@@ -137,7 +135,7 @@ func NewPage(w http.ResponseWriter, r *http.Request, db *sql.DB, jwt string) (*P
 
 	var callBackUrl string
 
-	if appengine.IsDevAppServer() {
+	if conf.IsDev {
 		callBackUrl = conf.Auth0CallbackHostDev + conf.Auth0CallbackURI
 	} else {
 		callBackUrl = conf.Auth0CallbackHostLive + conf.Auth0CallbackURI

@@ -47,7 +47,6 @@ func LastFailMsg(w http.ResponseWriter, r *http.Request) string {
 
 // Start will start a new user session. It uses a profile struct as input.
 func Start(w http.ResponseWriter, prof *profile.Profile) {
-
 	jwt, err := profile.ToJwt(prof)
 	if err != nil {
 		panic("Unable to create Jwt token from profile struct")

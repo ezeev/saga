@@ -1,0 +1,123 @@
+/*
+  Copyright 2017 Google Inc. All rights reserved.
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+      https://www.apache.org/licenses/LICENSE-2.0
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License
+*/
+
+@import "https://cdnjs.cloudflare.com/ajax/libs/normalize/7.0.0/normalize.min.css";
+
+
+/* Custom Styles */
+
+.home-img {
+    box-shadow: 1px 1px 1px 1px grey;
+}
+
+/* Base style */
+
+:root {
+    --mdc-theme-primary: #212121;
+    --mdc-theme-accent: #64DD17;
+}
+
+body {
+    font-family: Roboto, Helvetica, Arial, sans-serif;
+    color: #777;
+}
+
+fieldset {
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.mdc-toolbar a, .mdc-toolbar a:visited {
+    text-decoration: none;
+    color: #f0f0f0;
+}
+
+.catalog-title {
+    font-family: "Roboto Mono", monospace;
+}
+
+.catalog-logo, .catalog-back {
+    text-decoration: none;
+    padding-right: 24px;
+    color: #eeeeee;
+}
+
+
+/* Default padding on all examples. */
+section.example {
+    padding: 24px;
+    margin: 24px;
+}
+
+section.example h2 {
+    margin-left: 0;
+}
+
+.demo-theme__color {
+    display: inline-flex;
+    flex-direction: column;
+}
+.demo-theme__color__label {
+    display: inline-block;
+    box-sizing: border-box;
+    width: 130px;
+    margin-bottom: 1em;
+}
+.demo-theme__color__block {
+    display: inline-block;
+    box-sizing: border-box;
+    width: 130px;
+    height: 50px;
+    line-height: 50px;
+    text-align: center;
+    border: 1px solid #f0f0f0;
+}
+.demo-theme__text-styles {
+    display: inline-flex;
+    box-sizing: border-box;
+    padding: 16px;
+    border: 1px solid #f0f0f0;
+    align-items: center;
+    flex-direction: column;
+}
+@media(min-width: 768px) {
+    .demo-theme__text-styles {
+        flex-direction: row;
+    }
+}
+.demo-theme__text-styles > span {
+    padding: 0 16px;
+}
+.demo-theme--custom-light-bg {
+    background-color: #dddddd;
+}
+.demo-theme--custom-dark-bg {
+    background-color: #1d1d1d;
+}
+.example {
+    margin: 24px;
+    padding: 24px;
+}
+h2 {
+    margin-left: 48px;
+    margin-bottom: 0.8em;
+    margin-top: 0.8em;
+}
+h3 {
+    margin-bottom: 0.8em;
+    margin-top: 0.8em;
+}
+.hero button {
+    margin: 24px;
+}

@@ -1,3 +1,5 @@
+
+
 // Package middleware provides http HandlerFuncs for use with http web or API endpoints.
 package middleware
 
@@ -5,14 +7,10 @@ import (
 	"fmt"
 	"net/http"
 	"github.com/ezeev/saga/profile"
-	"github.com/ezeev/saga/ratelimit"
-	"google.golang.org/appengine"
-	"google.golang.org/appengine/log"
-	"github.com/ezeev/saga/config"
+	//"github.com/ezeev/saga/ratelimit"
 )
 
-// ApiAuth, when used on an API endpoint, provides CORS (including "OPTIONS" request support),
-// Java Web Token (jwt) validation/authorization, and IP Address based rate limiting.
+// Api, when used on an API endpoint, provides CORS (including "OPTIONS" request support).
 func Api(fn http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		//Set CORS Headers
@@ -27,6 +25,7 @@ func Api(fn http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
+// ApiAuth, when used on an API endpoint, provides Java Web Token (jwt) validation/authorization
 func ApiAuth(fn http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		//look for the jwt header
@@ -48,8 +47,7 @@ func ApiAuth(fn http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-
-func ApiRateLimit(fn http.HandlerFunc) http.HandlerFunc {
+/*func ApiRateLimit(fn http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		conf, err := config.Config()
@@ -69,5 +67,5 @@ func ApiRateLimit(fn http.HandlerFunc) http.HandlerFunc {
 		log.Debugf(c,"Hit Counter:%s %d", key, count)
 		fn.ServeHTTP(w, r)
 	}
-}
+}*/
 

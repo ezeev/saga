@@ -1,0 +1,60 @@
+
+    <!-- Available Subscription Plans -->
+    <p class="lead">Available Plans</p>
+
+    <p>
+    {{ if .UserProfile }}
+      <table class="table">
+        <thead>
+          <tr>
+            <td>Plan Name</td>
+            <td>Amount</td>
+            <td>Action</td>
+          </tr>
+        </thead>
+      {{range .Plans}}
+        <tr>
+          <td>{{ .Name }}</td>
+          <td>{{ displayAmount .Amount }}</td>
+          <td><a href="/subscribe?planId={{ .ID }}">Subscribe</a></td>
+        </tr>
+      {{end}}
+     </table>
+
+
+
+    {{ else }}
+      <i>Please login to see available plans.</i>
+    {{end}}
+    <!-- / end plans -->
+  </p>
+    <p class="lead">Your Subscriptions</p>
+    <p>
+    {{ if .StripeCustomer }}
+        {{ if .StripeCustomer.Subs }}
+          <table class="table">
+            <thead>
+            <tr>
+              <td>Plan Name</td>
+              <td>Quantity</td>
+              <td>Start Date</td>
+              <td>Amount</td>
+              <td>Action</td>
+            </tr>
+          </thead>
+            {{range .StripeCustomer.Subs.Values}}
+              <tr>
+                <td><b>{{.Plan.Name}}</b></td>
+                <td>{{.Quantity}}</td>
+                <td>{{ formatTime .Start }}</td>
+                <td>{{ $total := multiply .Plan.Amount .Quantity }}</td>
+                <td>{{ displayAmount $total}}</td>
+                <td><a href="/unsubscribe?subId={{ .ID }}">Unsubscribe</a></td>
+              </tr>
+            {{end}}
+          </table>
+        {{ else }}
+            <i>You have no subscriptions.</i>
+        {{end}}
+    {{end}}
+  </p>

@@ -1,0 +1,14 @@
+
+
+        <!-- / End Status Messages -->
+        <p class="lead">Profile Information</p>
+        <!-- User Profile -->
+        <p>
+            {{ if .UserProfile }}
+            You are logged in as {{ .UserProfile.Email}}. <a href="/signout">Signout</a>
+            <br />
+            {{ else }}
+            You are not logged in - <a href="#" onclick="showLogin()">login/register</a>
+            {{ end }}
+        </p>
+        <!-- / End User Profile -->

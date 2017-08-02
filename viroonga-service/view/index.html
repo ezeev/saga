@@ -1,0 +1,38 @@
+
+{{ template "header.html" . }}
+
+
+        <section class="cover imagebg text-center height-auto" data-overlay="3">
+            <div class="background-image-holder"> <img alt="background" src="static/img/4-bg.jpg"> </div>
+            <div class="container pos-vertical-center">
+                <div class="row">
+                    <div class="col-sm-8 col-md-7">
+                        <h1>Where Killer Apps Live</h1>
+                        <p class="lead">We provide entrepreneurs and organizations with the world class technology, human talent and infrastructure needed to create the next killer app or service.</p>
+                        <a href="#whatyouget"
+                        class="btn btn--primary type--uppercase"> <span class="btn__text">Learn More</span> </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="cover bg--secondary text-center unpad--bottom">
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="typed-headline"> <span class="h2 inline-block"><p>We build killer apps for</p></span> <span class="h2 inline-block typed-text typed-text--cursor color--primary" data-typed-strings="startups,search,big data,web,mobile,ecommerce,content management,machine learning,data science,finance,non-profits,fortune 500">big</span> </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12 col-md-10 col-md-offset-1"> <img class="unmarg--bottom box-shadow-wide" alt="Image" src="static/img/device-4.png">
+                        <div class="bg--dark box-shadow-wide"> <img class="unmarg--bottom" alt="Image" src="static/img/wedding-5.jpg"> </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+           {{ template "section-whatyouget.html" . }}
+           {{ template "section-ourprocess.html" . }}
+           {{ template "section-cta-contactus.html" . }}
+
+{{ template "footer.html" . }}

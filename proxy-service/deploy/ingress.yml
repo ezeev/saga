@@ -1,0 +1,10 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: viroonga-ingress
+spec:
+  tls:
+  - secretName: viroonga-letsencrypt-secret
+  backend:
+    serviceName: nginx
+    servicePort: 80

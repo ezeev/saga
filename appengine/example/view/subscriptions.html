@@ -1,0 +1,28 @@
+<section class="example">
+
+    <!-- Available Subscription Plans -->
+    <h3 class="mdc-typography--title">Subscription Plans</h3>
+    {{ if .UserProfile }}
+    {{range .Plans}}
+
+    {{ .Name }} - {{ displayAmount .Amount }} - <a href="/subscribe?planId={{ .ID }}">Subscribe</a><br />
+
+    {{end}}
+    {{end}}
+    <!-- / end plans -->
+
+    <h3 class="mdc-typography--title">Subscriptions</h3>
+    {{ if .StripeCustomer }}
+        {{ if .StripeCustomer.Subs }}
+            {{range .StripeCustomer.Subs.Values}}
+                {{.Plan.Name}} |
+                {{.Quantity}} |
+                {{ formatTime .Start }} |
+                {{ $total := multiply .Plan.Amount .Quantity }} |
+                {{ displayAmount $total}} | <a href="/unsubscribe?subId={{ .ID }}">Unsubscribe</a>
+            {{end}}
+        {{ else }}
+            No Subs
+        {{end}}
+    {{end}}
+</section>

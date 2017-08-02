@@ -1,0 +1,49 @@
+
+runtime: go
+api_version: go1
+
+handlers:
+
+- url: /favicon.ico
+  static_files: favicon.ico
+  upload: favicon.ico
+
+- url: /static
+  static_dir: static
+  secure: always
+
+- url: /.*
+  script: _go_app
+
+
+env_variables:
+  APP_NAME: 'Viroonga'
+  APP_DOMAIN: 'viroonga.appspot.com'
+  TEST_DOMAIN: 'localhost:8080'
+  METRICS_PROVIDER: 'prometheus'
+  METRICS_URI: '/metrics'
+  TEMPLATE_GLOB_PATTERN: "view/*.html"
+  STRIPE_CARD_REDIRECT: '/'
+  STRIPE_TEST_PK: 'pk_test_3XlyV4JacrilGkeqdFpHoIS2'
+  STRIPE_TEST_SK: 'sk_test_qL7kf0RlfRgLFJxOfLL1ggZu'
+
+  STRIPE_LIVE_PK: 'pk_live_eFcCa3tI6IiKtVVbNG08aNMT'
+  STRIPE_LIVE_SK: 'sk_live_zYSlQ2D2QBKBFnmAs5QelHXb'
+  STRIPE_APP_FILTER: ''
+
+  CLOUDSQL_CONNECTION_NAME: cloud-ninjaio:us-central1:cloud-ninja
+  CLOUDSQL_DB_NAME: 'viroonga'
+  # Replace username and password if you aren't using the root user.
+  CLOUDSQL_USER: root
+  CLOUDSQL_PASSWORD: ''
+  CLOUDSQL_DEV_CONN_STR: 'root@tcp(127.0.0.1:3306)/viroonga'
+
+  AUTH0_DOMAIN: 'quantiventures.auth0.com'
+  AUTH0_CLIENT_ID: 'StcQg3wVzcXY1eoGemgQTUxUisC7YyFt'
+  AUTH0_CLIENT_SECRET: 'QOGl-2o_BHUjmX35QejqzGbpeyZ6ZtVL6_YdKAtnpgbcJSviUbP0e4iEzL2UtBx2'
+  AUTH0_CALLBACK_URI: '/callback'
+  AUTH0_SIGNOUT_URI: '/signout'
+  AUTH0_CALLBACK_HOST_DEV: 'http://localhost:8080'
+  AUTH0_CALLBACK_HOST_LIVE: 'https://viroonga.appspot.com'
+  OAUTH_SUCCESS_REDIRECT: '/'
+  API_RATE_LIMIT_PER_MIN: '10'

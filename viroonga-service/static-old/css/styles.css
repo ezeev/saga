@@ -1,0 +1,74 @@
+
+/* Custom Styles */
+
+.hero {
+    background-image: url("../img/milky-way.jpg");
+    background-color: #222;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-color: black;
+    min-height: 360px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-flow: row nowrap;
+    padding-top: 50px;
+    padding-bottom: 50px;
+}
+
+.hero h1 {
+    color: white;
+    font-size: 60px;
+}
+
+.hero h3 {
+    color:white;
+}
+
+.hero h4 {
+    color:white;
+}
+
+.home-section {
+    margin-top: 5%;
+    min-height: 360px;
+    /*display: flex;*/
+    align-items: center;
+    justify-content: center;
+    flex-flow: row nowrap;
+    padding-top: 50px;
+    padding-bottom: 0px;
+}
+
+.home-alt-bg {
+    background-color: #f0f0f0;
+}
+
+.home-section-bg-1 {
+    background-image: url("../img/bg.jpg");
+    background-repeat: no-repeat;
+}
+
+.home-section-grid-row {
+    padding-left:10%;
+    padding-right:10%;
+    min-width: auto;
+}
+
+.home-section-content-div {
+    width: 80%;
+    text-align: left;
+}
+
+.home-section-left-cell {
+    padding-right:7%;
+}
+
+.home-section-right-cell {
+
+}
+
+
+.home-img {
+    box-shadow: 1px 1px 1px 1px grey;
+}

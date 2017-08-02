@@ -1,11 +1,11 @@
 package metrics
 
-
 import (
-	"net/http"
-	"os"
 	"github.com/prometheus/client_golang/prometheus"
+	"os"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"log"
+	"net/http"
 )
 
 var (
@@ -61,9 +61,10 @@ func (p prometheusMetrics) Start() {
 	prometheus.MustRegister(totalRequests)
 	prometheus.MustRegister(totalConfigLoads)
 	prometheus.MustRegister(totalLoginAttempts)
-
 	uri := os.Getenv("METRICS_URI")
+	log.Printf("Registering Metrics URI: %s", uri)
 	http.Handle(uri, promhttp.Handler())
+
 }
 
 func (p prometheusMetrics) IncStripeErrors() {

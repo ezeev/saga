@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"os"
 	"strconv"
-	"github.com/ezeev/saga/metrics"
+	//"github.com/ezeev/saga/metrics"
 )
 
 
@@ -27,22 +27,28 @@ type SagaConfig struct {
 	CloudSQLDBName string `yaml:"CLOUDSQL_DB_NAME"`
 	CloudSQLUser string `yaml:"CLOUDSQL_USER"`
 	CloudSQLPassword string `yaml:"CLOUDSQL_PASSWORD"`
-	CloudSQLDevConnStr string `yaml:"CLOUDSQL_DEV_CONN_STR"`
+	CloudSQLConnStr string `yaml:"CLOUDSQL_CONN_STR"`
 	Auth0Domain string `yaml:"AUTH0_DOMAIN"`
 	Auth0ClientID string `yaml:"AUTH0_CLIENT_ID"`
 	Auth0ClientSecret string `yaml:"AUTH0_CLIENT_SECRET"`
 	Auth0CallbackURI string `yaml:"AUTH0_CALLBACK_URI"`
 	Auth0SignoutURI string `yaml:"AUTH0_SIGNOUT_URI"`
+	Auth0SignoutRedirectURI string `yaml:"AUTH0_SIGNOUT_REDIRECT_URI"`
 	Auth0CallbackHostDev string `yaml:"AUTH0_CALLBACK_HOST_DEV"`
 	Auth0CallbackHostLive string `yaml:"AUTH0_CALLBACK_HOST_LIVE"`
 	OAuthSuccessRedirect string `yaml:"OAUTH_SUCCESS_REDIRECT"`
 	ApiRateLimitPerMin int `yaml:"API_RATE_LIMIT_PER_MIN"`
+	MailGunApiKey string `yaml:"MAIL_GUN_API_KEY"`
+	MailGunPubKey string `yaml:"MAIL_GUN_PUB_KEY"`
+	MailDefaultRecipientEmail string `yaml:"MAIL_DEFAULT_RECIPIENT_EMAIL"`
+	MailGunDomain string `yaml:"MAIL_GUN_DOMAIN"`
+	IsDev bool `yaml:"DEV"`
 }
 
 func Config() (*SagaConfig, error) {
 	// Lazy load config when accessed
 	if c == (SagaConfig{}) {
-		err := Load()
+		err := load()
 		if err != nil {
 			return nil, err
 		}
@@ -52,7 +58,7 @@ func Config() (*SagaConfig, error) {
 	}
 }
 
-func Load() error {
+func load() error {
 
 	ps := reflect.ValueOf(&c)
 	s := ps.Elem()
@@ -75,11 +81,17 @@ func Load() error {
 					return err
 				}
 				f.SetInt(intVal)
+			} else if f.Kind() == reflect.Bool {
+				v, err := strconv.ParseBool(envvar)
+				if err != nil {
+					return err
+				}
+				f.SetBool(v)
 			}
 
 		}
 	}
-	metrics.Registry().IncConfigLoads()
+	//metrics.Registry().IncConfigLoads()
 	return nil
 }
 

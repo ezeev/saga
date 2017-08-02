@@ -3,14 +3,12 @@ package stripe
 import (
 
 	"net/http"
-	"google.golang.org/appengine"
-	"google.golang.org/appengine/log"
 	"github.com/ezeev/saga/cloudsql"
 	"github.com/ezeev/saga/session"
 	"github.com/ezeev/saga/util"
-	"os"
-	"fmt"
 	"net/url"
+	"log"
+	"github.com/ezeev/saga/config"
 )
 
 var reqVars = []string{"STRIPE_TEST_PK", "STRIPE_TEST_SK", "STRIPE_LIVE_PK", "STRIPE_LIVE_SK"}
@@ -23,21 +21,26 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-
+	log.Print("Regisering Stripe Handlers:")
 	http.HandleFunc("/addcard", HandleAddCard)
 	http.HandleFunc("/delcard", HandleRemoveCard)
 	http.HandleFunc("/subscribe", HandleSubscribe)
 	http.HandleFunc("/unsubscribe", HandleUnsubscripe)
+	log.Print("/addcard, /delcard, /subscribe, /unsubscribe")
 }
 
 func HandleAddCard(w http.ResponseWriter, r *http.Request) {
-	c := appengine.NewContext(r)
+
+	conf, err := config.Config()
+	if err != nil {
+		log.Printf("Error loading config %s", err)
+	}
+
 	db, _ := cloudsql.CloudSQLConnection()
 	defer db.Close()
-	stripeMgr, err := NewStripeMgr(c,db)
+	stripeMgr, err := NewStripeMgr(db)
 	if err != nil {
-		log.Errorf(c,"Error creating stripemgr: %s", err)
-		fmt.Fprintf(w,"Error creating stripemgr: %s", err)
+		log.Printf("Error creating stipe mgr %s", err)
 	}
 
 	prof := session.Profile(r)
@@ -45,23 +48,22 @@ func HandleAddCard(w http.ResponseWriter, r *http.Request) {
 	cust, err := stripeMgr.Customer(email)
 	if err != nil {
 		errS := "Error retreiving customer: %s"
-		log.Errorf(c,errS, err)
-		fmt.Fprintf(w,errS, err)
+		log.Printf(errS, err)
 	}
 
 	token := r.FormValue("token_id")
-	log.Infof(c, "All Form: %s", r.Form)
-	log.Infof(c,"Token: %s", token)
-	log.Infof(c,"Stripe Id: %s\n Email: %s\nToken ID:%s", cust.ID, email, token)
+	log.Printf("All Form: %s", r.Form)
+	log.Printf("Token: %s", token)
+	log.Printf("Stripe Id: %s\n Email: %s\nToken ID:%s", cust.ID, email, token)
 
 	//add the CC to the customer's acct
 	card, err := stripeMgr.AddCard(cust.ID,token)
-	redir := os.Getenv("STRIPE_CARD_REDIRECT")
+	//redir := os.Getenv("STRIPE_CARD_REDIRECT")
+	redir := conf.StripeCardRedirect
 	if session.LastReferrerUrl(r) != "" {
 		redir = session.LastReferrerUrl(r)
 		redir, _ = url.QueryUnescape(redir)
 	}
-
 
 	if err != nil {
 		session.SetLastFailMsg(w,"Unable to add new card: " + err.Error())
@@ -72,14 +74,18 @@ func HandleAddCard(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleRemoveCard(w http.ResponseWriter, r *http.Request) {
-	c := appengine.NewContext(r)
+
+	conf, err := config.Config()
+	if err != nil {
+		log.Printf("Error loading config %s", err)
+	}
+
 	db, _ := cloudsql.CloudSQLConnection()
 	defer db.Close()
-	stripeMgr, err := NewStripeMgr(c,db)
+	stripeMgr, err := NewStripeMgr(db)
 	if err != nil {
 		errS := "Error creating stripemgr: %s"
-		log.Errorf(c,errS, err)
-		fmt.Fprintf(w,errS, err)
+		log.Printf(errS, err)
 
 	}
 
@@ -88,12 +94,11 @@ func HandleRemoveCard(w http.ResponseWriter, r *http.Request) {
 	cust, err := stripeMgr.Customer(email)
 	if err != nil {
 		errS := "Error retreiving customer: %s"
-		log.Errorf(c,errS, err)
-		fmt.Fprintf(w,errS, err)
+		log.Printf(errS, err)
 	}
 	custId := cust.ID
 	cardId := r.FormValue("cardId")
-	log.Infof(c,"Deleteing card for customer %s, %s", email, custId)
+	log.Printf("Deleteing card for customer %s, %s", email, custId)
 
 	_, err = stripeMgr.DelCard(custId,cardId)
 	if err != nil {
@@ -102,7 +107,8 @@ func HandleRemoveCard(w http.ResponseWriter, r *http.Request) {
 		session.SetLastSuccessMsg(w, "Successfully removed card!")
 	}
 
-	redirect := os.Getenv("STRIPE_CARD_REDIRECT")
+	//redirect := os.Getenv("STRIPE_CARD_REDIRECT")
+	redirect := conf.StripeCardRedirect
 	if session.LastReferrerUrl(r) != "" {
 		redirect = session.LastReferrerUrl(r)
 		redirect, _ = url.QueryUnescape(redirect)
@@ -113,12 +119,17 @@ func HandleRemoveCard(w http.ResponseWriter, r *http.Request) {
 
 func HandleSubscribe(w http.ResponseWriter, r *http.Request) {
 
-	c := appengine.NewContext(r)
+
+	conf, err := config.Config()
+	if err != nil {
+		log.Printf("Error loading config %s", err)
+	}
+
 	db, _ := cloudsql.CloudSQLConnection()
 	defer db.Close()
-	stripeMgr, err := NewStripeMgr(c,db)
+	stripeMgr, err := NewStripeMgr(db)
 
-	redirect := os.Getenv("STRIPE_CARD_REDIRECT")
+	redirect := conf.StripeCardRedirect //os.Getenv("STRIPE_CARD_REDIRECT")
 	if session.LastReferrerUrl(r) != "" {
 		redirect = session.LastReferrerUrl(r)
 		redirect, _ = url.QueryUnescape(redirect)
@@ -126,7 +137,7 @@ func HandleSubscribe(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		errS := "Error creating stripemgr: %s"
-		log.Errorf(c,errS, err)
+		log.Printf(errS, err)
 		session.SetLastFailMsg(w,"Unable to subscripe: " + err.Error())
 		http.Redirect(w, r, redirect, http.StatusTemporaryRedirect)
 	}
@@ -148,21 +159,25 @@ func HandleSubscribe(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleUnsubscripe(w http.ResponseWriter, r *http.Request) {
-	c := appengine.NewContext(r)
+
+	conf, err := config.Config()
+	if err != nil {
+		log.Printf("Error loading config %s", err)
+	}
+
 	db, _ := cloudsql.CloudSQLConnection()
 	defer db.Close()
 
-
-	redirect := os.Getenv("STRIPE_CARD_REDIRECT")
+	redirect := conf.StripeCardRedirect //os.Getenv("STRIPE_CARD_REDIRECT")
 	if session.LastReferrerUrl(r) != "" {
 		redirect = session.LastReferrerUrl(r)
 		redirect, _ = url.QueryUnescape(redirect)
 	}
 
-	stripeMgr, err := NewStripeMgr(c,db)
+	stripeMgr, err := NewStripeMgr(db)
 	if err != nil {
 		errS := "Error creating stripemgr: %s"
-		log.Errorf(c,errS, err)
+		log.Printf(errS, err)
 		session.SetLastFailMsg(w,"Unable to remove subscription: " + err.Error())
 		http.Redirect(w, r, redirect, http.StatusTemporaryRedirect)
 	}
