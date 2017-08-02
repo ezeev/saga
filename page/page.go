@@ -64,7 +64,6 @@ type Page struct {
 func NewPage(w http.ResponseWriter, r *http.Request, db *sql.DB, jwt string) (*Page, error) {
 
 	conf, _ := config.Config()
-
 	page := &Page{}
 	page.Path = r.RequestURI
 	var prof *profile.Profile
