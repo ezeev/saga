@@ -4,3 +4,4 @@ deployment.yml
 keys/*
 acme.sh/*
 .DS_Store
+export-vars.sh
