@@ -3,3 +3,4 @@ example/app.yaml
 deployment.yml
 keys/*
 acme.sh/*
+.DS_Store
